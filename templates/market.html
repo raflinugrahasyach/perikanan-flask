@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Fish Statik - Proyeksi Harga{% endblock %}
+{% block content %}
+<div class="container mx-auto max-w-7xl p-8">
+    
+    <h1 class="text-3xl font-bold text-navy-DEFAULT mb-6">Prediksi Harga Ikan (ARIMA)</h1>
+
+    {% if error %}
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-6" role="alert">
+        <strong class="font-bold">Error:</strong>
+        <span class="block sm:inline">{{ error }}</span>
+    </div>
+    {% endif %}
+
+    <div class="bg-card p-6 rounded-lg border border-border shadow-lg mb-8">
+        
+        <form method="POST" enctype="multipart/form-data" action="{{ url_for('market') }}" class="mb-6 pb-6 border-b border-border">
+            <h4 class="font-semibold text-foreground mb-2">Langkah 1: Upload File Data</h4>
+            <p class="text-sm text-muted-foreground mb-4">
+                File harus berisi:
+                <code class="text-xs bg-muted px-1 py-0.5 rounded">Tanggal</code>, 
+                <code class="text-xs bg-muted px-1 py-0.5 rounded">Jenis_Ikan</code>, 
+                <code class="text-xs bg-muted px-1 py-0.5 rounded">Volume_Produksi_Kg</code>, 
+                <code class="text-xs bg-muted px-1 py-0.5 rounded">Nilai_Produksi_Rp</code>.
+            </p>
+            <div class="flex flex-col md:flex-row gap-4">
+                <input type="file" name="file" required
+                       class="flex-grow file:mr-4 file:py-2 file:px-4
+                              file:rounded-lg file:border-0 file:text-sm file:font-semibold
+                              file:bg-primary/10 file:text-primary hover:file:bg-primary/20
+                              cursor-pointer border border-border rounded-lg text-sm text-muted-foreground">
+                
+                <input type="hidden" name="action" value="upload">
+                <button type="submit"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium
+                               bg-secondary text-secondary-foreground hover:bg-secondary/80 h-10 px-4 py-2">
+                    <i data-lucide="upload" class="h-4 w-4"></i>
+                    Upload & Isi Opsi Ikan
+                </button>
+            </div>
+        </form>
+
+        <form method="POST" action="{{ url_for('market') }}">
+            <h4 class="font-semibold text-foreground mb-2">Langkah 2: Jalankan Prediksi</h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                
+                <div>
+                    <label class="block text-sm font-medium text-foreground mb-2">Pilih Jenis Ikan</label>
+                    <select name="fish_type" required 
+                            class="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm
+                                   disabled:opacity-50"
+                            {% if not fish_options %}disabled{% endif %}>
+                        
+                        {% if fish_options %}
+                            <option value="" disabled selected>Pilih salah satu...</option>
+                            {% for fish in fish_options %}
+                                <option value="{{ fish }}" {% if fish == selected_fish %}selected{% endif %}>{{ fish }}</option>
+                            {% endfor %}
+                        {% else %}
+                            <option value="" disabled selected>Upload file dulu</option>
+                        {% endif %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-foreground mb-2">Periode (Bulan)</label>
+                    <input type="number" name="periods" value="6"
+                           class="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm
+                                  disabled:opacity-50"
+                           {% if not fish_options %}disabled{% endif %}>
+                </div>
+
+                <div class="flex items-end">
+                    <input type="hidden" name="action" value="analyze">
+                    <button type="submit"
+                            class="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium
+                                   bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2
+                                   disabled:opacity-50 disabled:cursor-not-allowed"
+                            {% if not fish_options %}disabled{% endif %}>
+                        <i data-lucide="dollar-sign" class="h-4 w-4"></i>
+                        Jalankan Prediksi Harga
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% if plot_harga %}
+    <div class="bg-card p-6 rounded-lg border border-border shadow-lg">
+        <h3 class="text-lg font-bold text-foreground mb-6">Hasil Prediksi Harga untuk {{ selected_fish }}</h3>
+        <img src="data:image/png;base64,{{ plot_harga }}" alt="Grafik Prediksi Harga" class="w-full h-auto">
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

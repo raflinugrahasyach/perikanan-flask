@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block title %}Klasifikasi Biota Laut{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-6 max-w-7xl py-8">
+    <h2 class="text-3xl font-bold text-center mb-8 text-primary">🔬 Klasifikasi Biota Laut</h2>
+
+    {% if error %}
+    <div class="bg-destructive/20 text-destructive border border-destructive/50 p-4 rounded-lg mb-6" role="alert">
+        <strong>Error:</strong> {{ error }}
+    </div>
+    {% endif %}
+
+    <div classs="w-full">
+        <nav class="flex border-b border-border">
+            <button id="btn-tab-upload" onclick="showTab('upload')"
+                class="tab-button py-3 px-6 font-medium text-foreground opacity-80 border-b-2 border-transparent -mb-px">
+                📁 Upload File
+            </button>
+            <button id="btn-tab-webcam" onclick="showTab('webcam')"
+                class="tab-button py-3 px-6 font-medium text-foreground opacity-80 border-b-2 border-transparent -mb-px">
+                📷 Ambil Foto
+            </button>
+        </nav>
+    </div>
+
+    <div id="tab-upload" class="tab-content bg-card p-6 rounded-b-lg rounded-tr-lg shadow-md border border-border border-t-0">
+        <p class="text-muted-foreground mb-4">Upload gambar biota laut (PNG, JPG, JPEG).</p>
+        <form method="POST" enctype="multipart/form-data" action="{{ url_for('classification') }}">
+            <div class="mb-4">
+                <input
+                    class="block w-full text-sm text-foreground border border-border rounded-lg cursor-pointer bg-background focus:outline-none file:bg-primary file:text-primary-foreground file:py-2 file:px-4 file:border-0 file:mr-4"
+                    type="file" name="file" id="file-input" required>
+            </div>
+            <button type="submit"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                Analisis Gambar
+            </button>
+        </form>
+    </div>
+
+    <div id="tab-webcam" class="tab-content bg-card p-6 rounded-b-lg rounded-tr-lg shadow-md border border-border border-t-0 hidden">
+        <p class="text-muted-foreground mb-4">Posisikan biota laut di depan kamera dan ambil gambar.</p>
+
+        <form method="POST" action="{{ url_for('classification') }}" id="webcam-form">
+            <input type="hidden" name="image_data" id="image-data-input">
+        </form>
+
+        <div class="text-center">
+            <video id="video-feed" autoplay playsinline class="w-full max-w-lg mx-auto rounded-lg border border-border bg-black"></video>
+            
+            <canvas id="canvas" class="w-full max-w-lg mx-auto rounded-lg border border-border hidden"></canvas>
+        </div>
+
+        <div class="text-center mt-4 space-x-2">
+            <button id="start-webcam"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-10 px-4 py-2">
+                Mulai Kamera
+            </button>
+            <button id="snap-photo"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-status-active text-white hover:bg-status-active/90 h-10 px-4 py-2 hidden">
+                Ambil Gambar
+            </button>
+            <button id="submit-photo"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 hidden"
+                onclick="submitWebcamPhoto()">
+                Analisis Foto
+            </button>
+        </div>
+    </div>
+
+    {% if result1 %}
+    <hr class="my-8 border-border">
+    <h3 class="text-2xl font-bold text-center mb-6 text-primary">Hasil Analisis</h3>
+    
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+        <div class="md:col-span-5 text-center">
+            <h4 class="text-xl font-semibold mb-4 text-foreground">Gambar Input</h4>
+            <img src="data:image/png;base64,{{ img_data }}" class="w-full rounded-lg border border-border shadow-md" alt="Gambar yang di-upload">
+        </div>
+
+        <div class="md:col-span-7">
+            <h4 class="text-xl font-semibold mb-4 text-foreground">Hasil Klasifikasi</h4>
+            
+            <div class="bg-card p-5 rounded-lg shadow-md border border-border mb-6">
+                <h5 class="text-lg font-semibold border-b border-border pb-3 mb-3 text-card-foreground">
+                    1. Jenis Biota Laut
+                </h5>
+                <h5 class="text-2xl font-bold text-ocean-blue">{{ get_confidence_color(result1.confidence) }} {{ result1.class }}</h5>
+                <p class="text-muted-foreground mb-3">Tingkat Keyakinan: <strong>{{ "%.1f"|format(result1.confidence * 100) }}%</strong></p>
+                <ul class="list-disc list-outside pl-5 space-y-1 text-card-foreground">
+                    <li><strong>Deskripsi:</strong> {{ info.species.description }}</li>
+                    <li><strong>Habitat:</strong> {{ info.species.habitat }}</li>
+                    <li><strong>Peran:</strong> {{ info.species.importance }}</li>
+                </ul>
+            </div>
+
+            <div class="bg-card p-5 rounded-lg shadow-md border border-border">
+                <h5 class="text-lg font-semibold border-b border-border pb-3 mb-3 text-card-foreground">
+                    2. Status Konservasi
+                </h5>
+                <h5 class="text-2xl font-bold text-ocean-blue">{{ get_confidence_color(result2.confidence) }} {{ result2.class }}</h5>
+                <p class="text-muted-foreground mb-3">Tingkat Keyakinan: <strong>{{ "%.1f"|format(result2.confidence * 100) }}%</strong></p>
+                
+                {% set alert_class = 'bg-muted text-muted-foreground border-border' %}
+                {% if info.conservation.urgency == 'CRITICAL' %}
+                    {% set alert_class = 'bg-destructive/20 text-destructive border-destructive/50' %}
+                {% elif info.conservation.urgency == 'SUSTAINABLE' %}
+                    {% set alert_class = 'bg-status-active/20 text-green-700 border-status-active/50' %}
+                {% endif %}
+                
+                <div class="p-3 rounded-md border {{ alert_class }}" role="alert">
+                    <strong class="font-semibold">{{ info.conservation.icon }} Status: {{ info.conservation.urgency }}</strong>
+                    <p class="text-sm">{{ info.conservation.description }}</p>
+                </div>
+
+                <h6 class="font-semibold mt-4 mb-2 text-card-foreground">Tindakan yang Dianjurkan:</h6>
+                <ul class="list-disc list-outside pl-5 space-y-1 text-card-foreground">
+                    {% for action in info.conservation.actions %}
+                    <li>{{ action }}</li>
+                    {% endfor %}
+                </ul>
+                <small class="block mt-4 text-muted-foreground">Dasar Hukum: {{ info.conservation.legal_basis }}</small>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Referensi elemen-elemen HTML
+    const video = document.getElementById('video-feed');
+    const canvas = document.getElementById('canvas');
+    const imageDataInput = document.getElementById('image-data-input');
+    
+    const btnStart = document.getElementById('start-webcam');
+    const btnSnap = document.getElementById('snap-photo');
+    const btnSubmit = document.getElementById('submit-photo');
+
+    const tabUpload = document.getElementById('tab-upload');
+    const tabWebcam = document.getElementById('tab-webcam');
+    const btnTabUpload = document.getElementById('btn-tab-upload');
+    const btnTabWebcam = document.getElementById('btn-tab-webcam');
+    const tabs = [btnTabUpload, btnTabWebcam];
+
+    let stream = null; // Variabel untuk menyimpan stream webcam
+
+    // Fungsi untuk ganti tab
+    function showTab(tabName) {
+        if (tabName === 'upload') {
+            tabUpload.classList.remove('hidden');
+            tabWebcam.classList.add('hidden');
+            // Style tab
+            btnTabUpload.classList.add('border-primary', 'text-primary', 'opacity-100');
+            btnTabWebcam.classList.remove('border-primary', 'text-primary', 'opacity-100');
+            stopWebcam(); // Matikan webcam jika pindah ke tab upload
+        } else {
+            tabUpload.classList.add('hidden');
+            tabWebcam.classList.remove('hidden');
+            // Style tab
+            btnTabUpload.classList.remove('border-primary', 'text-primary', 'opacity-100');
+            btnTabWebcam.classList.add('border-primary', 'text-primary', 'opacity-100');
+        }
+    }
+
+    // Fungsi untuk memulai webcam
+    async function startWebcam() {
+        try {
+            if (stream) {
+                stopWebcam(); // Hentikan stream lama jika ada
+            }
+            stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            video.srcObject = stream;
+            video.play();
+            
+            // --- PERBAIKAN VISUAL ---
+            video.classList.remove('hidden'); // Tampilkan video
+            canvas.classList.add('hidden');    // Sembunyikan canvas
+            
+            // Tampilkan/sembunyikan tombol yang relevan
+            btnStart.classList.add('hidden');
+            btnSnap.classList.remove('hidden');
+            btnSubmit.classList.add('hidden');
+        } catch (err) {
+            console.error("Error mengakses webcam: ", err);
+            alert("Tidak bisa mengakses kamera. Pastikan Anda memberikan izin.");
+        }
+    }
+
+    // Fungsi untuk menghentikan webcam
+    function stopWebcam() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+            video.srcObject = null;
+        }
+        // Selalu reset ke tampilan awal
+        btnStart.classList.remove('hidden');
+        btnSnap.classList.add('hidden');
+        btnSubmit.classList.add('hidden');
+
+        // --- PERBAIKAN VISUAL ---
+        video.classList.remove('hidden'); // Tampilkan lagi video (kosong)
+        canvas.classList.add('hidden');    // Sembunyikan canvas
+    }
+
+    // Fungsi untuk mengambil foto
+    function snapPhoto() {
+        // Atur ukuran canvas sesuai video
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        // Gambar frame video ke canvas
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // --- PERBAIKAN VISUAL (INI KUNCINYA) ---
+        video.classList.add('hidden');     // Sembunyikan video
+        canvas.classList.remove('hidden'); // Tampilkan canvas (dengan foto)
+
+        // Dapatkan data gambar sebagai Base64
+        const dataURL = canvas.toDataURL('image/png');
+        
+        // Masukkan data ke input tersembunyi
+        imageDataInput.value = dataURL;
+        
+        // Tampilkan tombol submit dan sembunyikan tombol ambil gambar
+        btnSnap.classList.add('hidden');
+        btnSubmit.classList.remove('hidden');
+        btnStart.classList.remove('hidden'); // Tampilkan 'Mulai Kamera' lagi agar bisa reset
+        
+        // Hentikan stream video
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+            video.srcObject = null;
+        }
+    }
+
+    // Fungsi untuk submit formulir webcam
+    function submitWebcamPhoto() {
+        if (imageDataInput.value) {
+            document.getElementById('webcam-form').submit();
+        } else {
+            alert("Silakan ambil gambar terlebih dahulu.");
+        }
+    }
+
+    // Tambahkan event listeners ke tombol
+    btnStart.addEventListener('click', startWebcam);
+    btnSnap.addEventListener('click', snapPhoto);
+
+    // Inisialisasi tab yang benar saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', () => {
+        showTab('upload'); // Mulai dengan tab upload
+    });
+
+    // Pastikan webcam mati jika pengguna meninggalkan halaman
+    window.addEventListener('beforeunload', stopWebcam);
+</script>
+
+{% endblock %}

@@ -1,0 +1,13 @@
+flask
+pandas
+numpy
+scikit-learn
+matplotlib
+plotly
+scipy
+tflite-runtime
+Pillow
+joblib
+openpyxl
+firebase-admin==6.0.1
+gunicorn

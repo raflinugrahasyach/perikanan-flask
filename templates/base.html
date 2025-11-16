@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Fish Statik - Analisis Perikanan{% endblock %}</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        background: 'hsl(var(--background))',
+                        foreground: 'hsl(var(--foreground))',
+                        card: 'hsl(var(--card))',
+                        'card-foreground': 'hsl(var(--card-foreground))',
+                        popover: 'hsl(var(--popover))',
+                        'popover-foreground': 'hsl(var(--popover-foreground))',
+                        primary: { DEFAULT: 'hsl(var(--primary))', foreground: 'hsl(var(--primary-foreground))' },
+                        secondary: { DEFAULT: 'hsl(var(--secondary))', foreground: 'hsl(var(--secondary-foreground))' },
+                        muted: { DEFAULT: 'hsl(var(--muted))', foreground: 'hsl(var(--muted-foreground))' },
+                        accent: { DEFAULT: 'hsl(var(--accent))', foreground: 'hsl(var(--accent-foreground))' },
+                        destructive: { DEFAULT: 'hsl(var(--destructive))', foreground: 'hsl(var(--destructive-foreground))' },
+                        border: 'hsl(var(--border))',
+                        input: 'hsl(var(--input))',
+                        ring: 'hsl(var(--ring))',
+                        navy: { DEFAULT: 'hsl(var(--navy))', foreground: 'hsl(var(--navy-foreground))' },
+                        ocean: { DEFAULT: 'hsl(var(--ocean-blue))', light: 'hsl(var(--ocean-blue-light))' },
+                        status: {
+                            active: 'hsl(var(--status-active))',
+                            development: 'hsl(var(--status-development))',
+                            beta: 'hsl(var(--status-beta))',
+                        }
+                    },
+                    borderRadius: {
+                        lg: 'var(--radius)',
+                        md: 'calc(var(--radius) - 2px)',
+                        sm: 'calc(var(--radius) - 4px)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer base {
+            :root {
+                --background: 220 20% 97%;
+                --foreground: 200 100% 15%;
+                --card: 0 0% 100%;
+                --card-foreground: 200 100% 15%;
+                --popover: 0 0% 100%;
+                --popover-foreground: 200 100% 15%;
+                --primary: 200 100% 21%;
+                --primary-foreground: 0 0% 100%;
+                --secondary: 200 18% 85%; /* Hero Section */
+                --muted: 220 15% 92%;
+                --muted-foreground: 200 10% 45%;
+                --accent: 200 18% 85%;
+                --accent-foreground: 200 100% 15%;
+                --destructive: 0 84.2% 60.2%;
+                --destructive-foreground: 0 0% 100%;
+                --border: 220 15% 88%;
+                --input: 220 15% 88%;
+                --ring: 200 100% 21%;
+                --radius: 0.75rem;
+                --navy: 200 100% 21%;
+                --navy-foreground: 0 0% 100%;
+                --ocean-blue: 200 100% 40%;
+                --ocean-blue-light: 200 100% 50%;
+                --status-active: 142 71% 45%;
+                --status-development: 38 92% 50%;
+                --status-beta: 188 78% 41%;
+            }
+            body {
+                font-family: 'Inter', sans-serif;
+            }
+            
+            /* Style nav link kustom */
+            .custom-nav-link {
+                color: hsl(var(--navy-foreground));
+                transition: color 0.2s;
+                opacity: 0.9;
+            }
+            .custom-nav-link:hover {
+                color: hsl(var(--ocean-blue-light));
+                opacity: 1;
+            }
+            .custom-nav-link.active {
+                color: hsl(var(--ocean-blue-light));
+                font-weight: 600;
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body class="bg-background text-foreground antialiased">
+
+    <header class="bg-navy text-navy-foreground sticky top-0 z-50 shadow-lg">
+        <div class="container mx-auto px-6 max-w-7xl">
+            <div class="flex items-center justify-between h-16">
+                <a href="{{ url_for('index') }}" class="flex items-center gap-3">
+                    <div class="bg-white rounded-lg p-2">
+                        <i data-lucide="fish" class="h-6 w-6" style="color: hsl(var(--ocean-blue));"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold">FishStatik</h1>
+                </a>
+                
+                <nav class="hidden md:flex items-center gap-8">
+                    {% macro nav_link_top(endpoint, icon_name, label) %}
+                        <a href="{{ url_for(endpoint) }}" 
+                           class="custom-nav-link flex items-center gap-2 text-sm font-medium
+                                  {% if request.endpoint == endpoint %}active{% endif %}">
+                            <i data-lucide="{{ icon_name }}" class="h-4 w-4"></i>
+                            {{ label }}
+                        </a>
+                    {% endmacro %}
+                    
+                    {{ nav_link_top('analysis', 'trending-up', 'CPUE & MSY') }}
+                    
+                    {{ nav_link_top('predict_model', 'brain', 'Prediksi Stok') }}
+                    
+                    {{ nav_link_top('market', 'dollar-sign', 'Proyeksi Harga') }}
+                    {{ nav_link_top('dashboard', 'bar-chart-3', 'Visualisasi') }}
+                    {{ nav_link_top('classification', 'fish', 'Klasifikasi') }}
+                    {{ nav_link_top('game', 'zap', 'Simulasi') }}
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        // Menunggu semua dimuat sebelum menggambar ikon
+        window.addEventListener("load", function() {
+            lucide.createIcons();
+        });
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

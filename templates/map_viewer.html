@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Peta Pelacakan Langsung{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<style>
+    /* Paksa peta untuk memiliki tinggi */
+    #peta-map {
+        height: 75vh;
+        /* z-index 0 agar di bawah header */
+        z-index: 0; 
+    }
+</style>
+
+<div class="container mx-auto px-6 max-w-7xl py-8 relative">
+    
+    <div class="absolute top-12 right-6 z-[1000] bg-card p-5 rounded-lg shadow-lg border border-border w-full max-w-xs">
+        <h3 class="text-xl font-bold text-primary mb-3 border-b border-border pb-2">Peta Pelacakan Kapal</h3>
+        <div class="flex justify-between items-center">
+            <span class="text-lg font-medium text-foreground">Kapal Aktif:</span>
+            <span id="vessel-count" class="text-2xl font-bold text-ocean-blue">0</span>
+        </div>
+        <p class="text-sm text-muted-foreground mt-2">Lokasi diperbarui secara *real-time* dari Firebase.</p>
+    </div>
+
+    <div id="peta-map" class="w-full rounded-lg border border-border shadow-md">
+        </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="{{ url_for('static', filename='js/peta.js') }}"></script>
+{% endblock %}

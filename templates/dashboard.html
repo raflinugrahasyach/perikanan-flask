@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Fish Statik - Visualisasi Produksi{% endblock %}
+
+{% block content %}
+<div class="container mx-auto max-w-7xl p-8">
+    
+    <h1 class="text-3xl font-bold text-navy-DEFAULT mb-6">Visualisasi Analisis Produksi</h1>
+
+    {% if error %}
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-6" role="alert">
+        <strong class="font-bold">Error:</strong>
+        <span class="block sm:inline">{{ error }}</span>
+    </div>
+    {% endif %}
+
+    <div class="bg-card p-6 rounded-lg border border-border shadow-lg mb-8">
+        <h3 class="text-lg font-bold text-foreground mb-4">Upload Data Visualisasi</h3>
+        <p class="text-sm text-muted-foreground mb-4">
+            Upload file CSV atau TXT (tab-separated) dari laporan produksi Anda.
+            File harus berisi kolom: 
+            <code class="text-xs bg-muted px-1 py-0.5 rounded">Tahun</code>, 
+            <code class="text-xs bg-muted px-1 py-0.5 rounded">Bulan</code>, 
+            <code class="text-xs bg-muted px-1 py-0.5 rounded">Jenis Ikan</code>, dan 
+            <code class="text-xs bg-muted px-1 py-0.5 rounded">Volume Produksi (kg)</code>.
+        </p>
+
+        <form method="POST" enctype="multipart/form-data" action="{{ url_for('dashboard') }}">
+            <div class="flex flex-col md:flex-row gap-4">
+                <input type="file" name="file" required
+                       class="flex-grow file:mr-4 file:py-2 file:px-4
+                              file:rounded-lg file:border-0 file:text-sm file:font-semibold
+                              file:bg-primary/10 file:text-primary hover:file:bg-primary/20
+                              cursor-pointer border border-border rounded-lg text-sm text-muted-foreground">
+                
+                <button type="submit"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium
+                               bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                    <i data-lucide="bar-chart-3" class="h-4 w-4"></i>
+                    Buat Visualisasi
+                </button>
+            </div>
+        </form>
+    </div>
+    {% if kpi %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-card p-6 rounded-lg shadow-lg border border-border">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-medium text-muted-foreground">Total Tangkapan</h3>
+                <div class="p-2 bg-blue-100 rounded-lg">
+                    <i data-lucide="anchor" class="w-5 h-5" style="color: hsl(var(--ocean-blue));"></i>
+                </div>
+            </div>
+            <div class="text-3xl font-bold text-foreground mb-1">{{ kpi.total_produksi_m | default('0 M') }} <span class="text-lg font-normal text-gray-400">Kg</span></div>
+            <div class="flex items-center text-sm text-green-600 font-medium">
+                <i data-lucide="trending-up" class="w-4 h-4 mr-1"></i>
+                +12.5% <span class="text-gray-400 ml-1 font-normal">vs bulan lalu</span>
+            </div>
+        </div>
+
+        <div class="bg-card p-6 rounded-lg shadow-lg border border-border">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-medium text-muted-foreground">Jumlah Jenis Ikan</h3>
+                <div class="p-2 bg-purple-100 rounded-lg">
+                    <i data-lucide="fish" class="w-5 h-5" style="color: #8B5CF6;"></i>
+                </div>
+            </div>
+            <div class="text-3xl font-bold text-foreground mb-1">{{ kpi.jumlah_jenis | default('0') }}</div>
+            <div class="text-sm text-muted-foreground">
+                Jenis unik terdeteksi
+            </div>
+        </div>
+
+        <div class="bg-card p-6 rounded-lg shadow-lg border border-border">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-medium text-muted-foreground">Rata-rata/Bulan</h3>
+                <div class="p-2 bg-green-100 rounded-lg">
+                    <i data-lucide="banknote" class="w-5 h-5" style="color: #10B981;"></i>
+                </div>
+            </div>
+            <div class="text-3xl font-bold text-foreground mb-1">{{ kpi.rata_bulanan_k | default('0 K') }} <span class="text-lg font-normal text-gray-400">Kg</span></div>
+            <div class="flex items-center text-sm text-red-500 font-medium">
+                <i data-lucide="trending-down" class="w-4 h-4 mr-1"></i>
+                -2.1% <span class="text-gray-400 ml-1 font-normal">minggu ini</span>
+            </div>
+        </div>
+
+        <div class="bg-card p-6 rounded-lg shadow-lg border border-border">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-medium text-muted-foreground">Tahun Terbaik</h3>
+                <div class="p-2 bg-orange-100 rounded-lg">
+                    <i data-lucide="ship" class="w-5 h-5" style="color: #F97316;"></i>
+                </div>
+            </div>
+            <div class="text-3xl font-bold text-foreground mb-1">{{ kpi.tahun_terbaik | default('N/A') }}</div>
+            <div class="text-sm text-muted-foreground">
+                Produksi tertinggi
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div class="lg:col-span-2 bg-card p-6 rounded-lg border border-border shadow-lg">
+            <h3 class="text-lg font-bold text-foreground mb-6">Tren Produksi Tahunan</h3>
+            {% if plot_tren %}
+                {{ plot_tren | safe }}
+            {% else %}
+                <div class="h-72 bg-gray-50 rounded-lg flex items-center justify-center border border-dashed border-gray-300">
+                    <p class="text-gray-400">Gagal memuat plot tren.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="bg-card p-6 rounded-lg border border-border shadow-lg">
+            <h3 class="text-lg font-bold text-foreground mb-6">Komposisi Ikan</h3>
+            {% if plot_komposisi %}
+                {{ plot_komposisi | safe }}
+            {% else %}
+                <div class="h-72 bg-gray-50 rounded-lg flex items-center justify-center border border-dashed border-gray-300">
+                    <p class="text-gray-400">Gagal memuat plot komposisi.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,13 @@
+# Kredensial rahasia
+firebase-service-account.json
+
+# Folder virtual environment Python
+.venv/
+venv/
+
+# File cache Python
+__pycache__/
+*.pyc
+
+# Abaikan file model Keras yang besar
+*.h5

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Fish Statik - Analisis CPUE & MSY{% endblock %}
+
+{% block content %}
+<div class="container mx-auto max-w-7xl p-8">
+    
+    <h1 class="text-3xl font-bold text-navy-DEFAULT mb-6">Analisis CPUE & MSY (Model Schaefer)</h1>
+
+    {% if error %}
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-6" role="alert">
+        <strong class="font-bold">Error:</strong>
+        <span class="block sm:inline">{{ error }}</span>
+    </div>
+    {% endif %}
+
+    <div class="bg-card p-6 rounded-lg border border-border shadow-lg mb-8">
+        <h3 class="text-lg font-bold text-foreground mb-4">Upload Data Analisis</h3>
+        <p class="text-sm text-muted-foreground mb-4">
+            Upload file CSV atau TXT Anda untuk memulai analisis. Pastikan file berisi kolom:
+            <code class="text-xs bg-muted px-1 py-0.5 rounded">Tahun</code>, 
+            <code class="text-xs bg-muted px-1 py-0.5 rounded">Alat_Tangkap</code>, 
+            <code class="text-xs bg-muted px-1 py-0.5 rounded">Produksi</code>, dan 
+            <code class="text-xs bg-muted px-1 py-0.5 rounded">Upaya</code>.
+        </p>
+
+        <form method="POST" enctype="multipart/form-data" action="{{ url_for('analysis') }}">
+            <div class="flex flex-col md:flex-row gap-4">
+                <input type="file" name="file" required
+                       class="flex-grow file:mr-4 file:py-2 file:px-4
+                              file:rounded-lg file:border-0
+                              file:text-sm file:font-semibold
+                              file:bg-primary/10 file:text-primary
+                              hover:file:bg-primary/20
+                              cursor-pointer border border-border rounded-lg text-sm text-muted-foreground">
+                
+                <button type="submit"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium
+                               bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                    <i data-lucide="bar-chart-2" class="h-4 w-4"></i>
+                    Jalankan Analisis
+                </button>
+            </div>
+        </form>
+    </div>
+    {% if msy_results %}
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {% if msy_results.success %}
+            <div class="bg-card p-6 rounded-lg shadow-lg border border-border">
+                <h3 class="text-sm font-medium text-muted-foreground">Estimasi C_MSY (Hasil Maks.)</h3>
+                <div class="text-3xl font-bold text-foreground mt-2">{{ "%.2f"|format(msy_results.C_MSY) }} <span class="text-lg font-normal text-gray-400">Kg</span></div>
+            </div>
+            <div class="bg-card p-6 rounded-lg shadow-lg border border-border">
+                <h3 class="text-sm font-medium text-muted-foreground">Estimasi F_MSY (Upaya Maks.)</h3>
+                <div class="text-3xl font-bold text-foreground mt-2">{{ "%.2f"|format(msy_results.F_MSY) }} <span class="text-lg font-normal text-gray-400">Trip</span></div>
+            </div>
+            <div class="bg-card p-6 rounded-lg shadow-lg border border-border">
+                <h3 class="text-sm font-medium text-muted-foreground">Koefisien (a)</h3>
+                <div class="text-3xl font-bold text-foreground mt-2">{{ "%.4f"|format(msy_results.a) }}</div>
+            </div>
+            <div class="bg-card p-6 rounded-lg shadow-lg border border-border">
+                <h3 class="text-sm font-medium text-muted-foreground">Koefisien (b)</h3>
+                <div class="text-3xl font-bold text-foreground mt-2">{{ "%.6f"|format(msy_results.b) }}</div>
+            </div>
+        {% else %}
+            <div class="bg-red-100 border-red-400 text-red-700 p-4 rounded-lg col-span-4">
+                <strong>Gagal Analisis MSY:</strong> {{ msy_results.error }}
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="bg-card p-6 rounded-lg border border-border shadow-lg">
+            <h3 class="text-lg font-bold text-foreground mb-6">Produksi vs Effort</h3>
+            {% if plot_prod_effort %}
+                <img src="data:image/png;base64,{{ plot_prod_effort }}" alt="Grafik Produksi vs Effort" class="w-full h-auto">
+            {% else %}
+                <div class="h-72 bg-gray-50 rounded-lg flex items-center justify-center border border-dashed border-gray-300">
+                    <p class="text-gray-400">Gagal memuat plot.</p>
+                </div>
+            {% endif %}
+        </div>
+        <div class="bg-card p-6 rounded-lg border border-border shadow-lg">
+            <h3 class="text-lg font-bold text-foreground mb-6">CPUE vs Effort (Schaefer)</h3>
+            {% if plot_cpue_effort %}
+                <img src="data:image/png;base64,{{ plot_cpue_effort }}" alt="Grafik CPUE vs Effort" class="w-full h-auto">
+            {% else %}
+                <div class="h-72 bg-gray-50 rounded-lg flex items-center justify-center border border-dashed border-gray-300">
+                    <p class="text-gray-400">Gagal memuat plot.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="bg-card rounded-lg border border-border shadow-lg overflow-hidden">
+        <div class="p-6 border-b border-border">
+            <h3 class="text-lg font-bold text-foreground">Data CPUE per Alat Tangkap</h3>
+        </div>
+        <div class="overflow-x-auto p-6">
+            {% if cpue_table %}
+                <style>
+                    .dataframe { width: 100%; font-size: 14px; }
+                    .dataframe th { text-align: left; padding: 10px 12px; background-color: #f9fafb; color: #6b7280; font-weight: 500; border-bottom: 1px solid hsl(var(--border)); }
+                    .dataframe td { padding: 10px 12px; border-bottom: 1px solid hsl(var(--border)); }
+                    .dataframe tr:last-child td { border-bottom: none; }
+                    .dataframe tr:hover { background-color: #f9fafb; }
+                </style>
+                {{ cpue_table | safe }}
+            {% else %}
+                <p class="text-gray-400 p-4 text-center">Gagal memuat tabel.</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    </div>
+{% endblock %}

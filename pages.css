@@ -1,0 +1,214 @@
+/* --- 
+  Versi Final: Menerjemahkan React/Tailwind ke Streamlit
+  Target: 100% identik dengan gambar referensi (Navbar Atas)
+--- */
+
+/* --- 1. Definisi Variabel Warna (dari referensi index.css) --- */
+:root {
+    --background: 220 20% 97%; /* #F5F7FA */
+    --foreground: 200 100% 15%; /* #002B4D */
+    --card: 0 0% 100%;         /* #FFFFFF */
+    --card-foreground: 200 100% 15%;
+    --secondary: 200 18% 85%;    /* #D2D9E0 (Untuk Hero Section) */
+    --muted-foreground: 200 10% 45%; /* #657482 */
+    --border: 220 15% 88%;      /* #DCE1E8 */
+    --radius: 0.75rem;         /* 12px */
+    
+    /* Warna Navbar Atas (dari Header di Index.tsx) */
+    --navy: 200 100% 21%;       /* #003666 */
+    --navy-foreground: 0 0% 100%; /* #FFFFFF */
+    
+    /* Warna Aksen Ikon (dari Header di Index.tsx) */
+    --ocean-blue: 200 100% 40%;     /* #008DFF */
+    --ocean-blue-light: 200 100% 50%; /* #1AA3FF */
+
+    /* Warna Badge (dari FeatureCard di Index.tsx) */
+    --status-active: 142 71% 45%;     /* #2EAE4F */
+    --status-development: 38 92% 50%; /* #F2B01E */
+    --status-beta: 188 78% 41%;       /* #1DABC6 */
+}
+
+/* --- 2. Sembunyikan Bawaan Streamlit --- */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+[data-testid="stSidebar"] { display: none; } /* WAJIB: Sembunyikan Sidebar Kiri */
+
+/* Tarik konten ke atas mengisi ruang sidebar/header */
+div[data-testid="stAppViewContainer"] {
+    margin-top: -6rem; 
+}
+
+/* --- 3. Style Navbar Atas Kustom (dari main.py) --- */
+.custom-header {
+    background-color: hsl(var(--navy));
+    color: hsl(var(--navy-foreground));
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    height: 64px; /* h-16 */
+    width: 100%;
+    margin-bottom: 2rem; /* Beri jarak sebelum konten utama */
+}
+
+.custom-header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 1.5rem; /* px-6 */
+}
+
+.custom-header-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem; /* gap-3 */
+}
+
+.custom-header-logo .icon-bg {
+    background-color: white;
+    border-radius: 0.5rem; /* rounded-lg */
+    padding: 0.5rem; /* p-2 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.custom-header-logo h1 {
+    font-size: 1.5rem; /* text-2xl */
+    font-weight: 700;
+    color: white;
+}
+
+.custom-nav {
+    display: flex;
+    align-items: center;
+    gap: 2rem; /* gap-8 */
+}
+
+/* Tombol Navigasi Kustom */
+.custom-nav-button {
+    background: none;
+    border: none;
+    color: hsl(var(--navy-foreground));
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* gap-2 */
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.custom-nav-button:hover {
+    color: hsl(var(--ocean-blue-light));
+}
+.custom-nav-button.active {
+    color: hsl(var(--ocean-blue-light));
+    font-weight: 600;
+}
+
+/* --- 4. Style Hero Section (dari Home.py) --- */
+.custom-hero {
+    background-color: hsl(var(--secondary));
+    padding: 4rem 0; /* py-16 */
+    margin-bottom: 3rem; /* mb-12 */
+}
+.custom-hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 896px; /* max-w-4xl */
+    margin: 0 auto;
+    padding: 0 1.5rem; /* px-6 */
+}
+.custom-hero-content h1 {
+    font-size: 3rem; /* text-5xl */
+    font-weight: 700;
+    color: hsl(var(--navy));
+    margin-bottom: 1rem; /* mb-4 */
+}
+.custom-hero-content p {
+    font-size: 1.125rem; /* text-lg */
+    color: hsl(var(--muted-foreground));
+}
+
+/* --- 5. Style Feature Card (dari Home.py) --- */
+.feature-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem; /* gap-8 */
+    max-width: 1280px;
+    margin: 0 auto 3rem auto;
+    padding: 0 1.5rem; /* px-6 */
+}
+.feature-card {
+    background-color: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.3s;
+    position: relative;
+    text-align: center;
+}
+.feature-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.07);
+}
+.feature-card-content {
+    padding: 3rem 1.5rem 2rem; /* pt-12 pb-8 px-6 */
+}
+.feature-card-icon {
+    margin-bottom: 1.5rem; /* mb-6 */
+    display: flex;
+    justify-content: center;
+}
+.feature-card-icon-bg {
+    background-color: hsl(var(--ocean-blue));
+    border-radius: 9999px; /* rounded-full */
+    padding: 1.5rem; /* p-6 */
+    display: inline-flex;
+}
+.feature-card h3 {
+    font-size: 1.25rem; /* text-xl */
+    font-weight: 700;
+    color: hsl(var(--navy));
+    margin-bottom: 0.75rem; /* mb-3 */
+}
+.feature-card p {
+    font-size: 14px;
+    color: hsl(var(--muted-foreground));
+    line-height: 1.6;
+}
+.feature-card-badge {
+    position: absolute;
+    top: 1rem; /* top-4 */
+    right: 1rem; /* right-4 */
+    padding: 0.25rem 0.75rem; /* px-3 py-1 */
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 9999px; /* rounded-full */
+    color: white;
+}
+/* Warna badge */
+.badge-active { background-color: hsl(var(--status-active)); }
+.badge-development { background-color: hsl(var(--status-development)); }
+.badge-beta { background-color: hsl(var(--status-beta)); }
+
+/* --- 6. Style Kontainer (untuk halaman lain) --- */
+.chart-container, .kpi-card {
+    background-color: hsl(var(--card));
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    border: 1px solid hsl(var(--border));
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.dashboard-title {
+    font-size: 30px;
+    font-weight: 700;
+    color: hsl(var(--foreground));
+    padding-bottom: 10px;
+}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Bagikan Lokasi Kapal{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-6 max-w-7xl py-12 flex justify-center items-center">
+
+    <div class="bg-card p-8 rounded-lg shadow-lg border border-border w-full max-w-md">
+        
+        <div class="text-center mb-6">
+            <i data-lucide="map-pin" class="h-12 w-12 text-primary mx-auto"></i>
+            <h2 class="text-3xl font-bold text-primary mt-2">Bagikan Lokasi Kapal</h2>
+            <p class="text-muted-foreground mt-2">Isi data kapal dan mulai berbagi lokasi GPS Anda secara langsung.</p>
+        </div>
+
+        <form id="share-form" class="space-y-5">
+            <div>
+                <label for="namaKapal" class="block text-sm font-medium text-foreground mb-1">Nama Kapal</label>
+                <input type="text" id="namaKapal" name="namaKapal" required
+                    class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="cth: KM. Jaya Abadi 05">
+            </div>
+            
+            <div>
+                <label for="jenisKapal" class="block text-sm font-medium text-foreground mb-1">Jenis Kapal</label>
+                <input type="text" id="jenisKapal" name="jenisKapal" required
+                    class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="cth: Pancing Tonda">
+            </div>
+
+            <div>
+                <label for="muatan" class="block text-sm font-medium text-foreground mb-1">Muatan (Ton)</label>
+                <input type="number" id="muatan" name="muatan" required
+                    class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="cth: 5">
+            </div>
+
+            <div class="pt-2">
+                <button type="submit" id="share-btn"
+                    class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus:visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-4 py-2 text-base font-semibold">
+                    Mulai Berbagi Lokasi
+                </button>
+            </div>
+        </form>
+
+        <div class="text-center mt-5 p-4 bg-muted rounded-lg border border-border">
+            <p id="status-message" class="text-sm text-muted-foreground">Status: Tidak aktif</p>
+            <p id="coordinates" class="text-sm font-mono text-ocean-blue mt-1"></p>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="{{ url_for('static', filename='js/peta.js') }}"></script>
+{% endblock %}
